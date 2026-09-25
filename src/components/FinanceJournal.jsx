@@ -66,21 +66,23 @@ function FinanceJournal({ transactions, setTransactions }) {
         />
         <button type="submit">Add Entry</button>
       </form>
-        <ul className="transaction-list">
-        {transactions
-          .slice()
-          .reverse()
-          .map((t) => (
-            <li key={t.id} className={t.type}>
-              <span className="entry-date">{t.date}</span>
-              <span className="entry-category">{t.category}</span>
-              <span className="entry-amount">
-                {t.type === 'income' ? '+' : '-'}${t.amount.toFixed(2)}
-              </span>
-              {t.note && <span className="entry-note">{t.note}</span>}
-            </li>
-          ))}
-      </ul>
+      <ul className="transaction-list">
+          {transactions
+            .slice()
+            .reverse()
+            .map((t) => (
+              <li key={t.id} className={t.type}>
+                <span className="entry-date">{t.date}</span>
+                <span className="entry-category">{t.category}</span>
+                {t.type !== 'note' && (
+                  <span className="entry-amount">
+                    {t.type === 'income' ? '+' : '-'}${t.amount.toFixed(2)}
+                  </span>
+                )}
+                {t.note && <span className="entry-note">{t.note}</span>}
+              </li>
+            ))}
+        </ul>
     </div>
   );
 }

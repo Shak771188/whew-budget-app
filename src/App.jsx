@@ -14,7 +14,7 @@ function App() {
     <div className="app">
       <Navigation activeTab={activeTab} setActiveTab={setActiveTab} />
       {activeTab === 'dashboard' && (
-        <Dashboard transactions={transactions} goals={goals} />
+        <Dashboard transactions={transactions} goals={goals} setTransactions={setTransactions} />
       )}
       {activeTab === 'goals' && (
         <Goals goals={goals} setGoals={setGoals} />

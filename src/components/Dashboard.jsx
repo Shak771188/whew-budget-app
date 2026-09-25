@@ -1,4 +1,5 @@
-function Dashboard({ transactions, goals }) {
+import { useState } from 'react';
+function Dashboard({ transactions, goals, setTransactions }) {
   const totalIncome = transactions
     .filter((t) => t.type === 'income')
     .reduce((sum, t) => sum + t.amount, 0);
@@ -36,6 +37,24 @@ function Dashboard({ transactions, goals }) {
     }
     return "You're on track. Keep logging your transactions to stay ahead.";
   }
+  const [quickNote, setQuickNote] = useState('');
+
+  function handleQuickNote(e) {
+    e.preventDefault();
+    if (!quickNote.trim()) return;
+
+    const newEntry = {
+      id: Date.now(),
+      date: new Date().toISOString().split('T')[0],
+      category: 'Note',
+      amount: 0,
+      type: 'note',
+      note: quickNote,
+    };
+
+    setTransactions([...transactions, newEntry]);
+    setQuickNote('');
+  }
 
   return (
     <div className="dashboard">
@@ -67,6 +86,15 @@ function Dashboard({ transactions, goals }) {
         <h3>Next Step</h3>
         <p>{getNextStep()}</p>
       </div>
+      <form className="quick-note" onSubmit={handleQuickNote}>
+        <input
+          type="text"
+          placeholder="Quick note for your Finance Journal..."
+          value={quickNote}
+          onChange={(e) => setQuickNote(e.target.value)}
+        />
+        <button type="submit">Add</button>
+      </form>
 
       <h3>Spending by Category</h3>
       {Object.keys(categoryTotals).length === 0 ? (
