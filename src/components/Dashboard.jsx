@@ -16,6 +16,27 @@ function Dashboard({ transactions, goals }) {
       return totals;
     }, {});
 
+  const goalProgress =
+    goals.length === 0
+      ? 0
+      : goals.reduce((sum, g) => sum + g.current / g.target, 0) / goals.length;
+
+  const goalProgressPercent = Math.round(goalProgress * 100);
+
+  function getNextStep() {
+    if (goals.length === 0) {
+      return 'Head to the Goals tab to set your first financial goal.';
+    }
+    const almostThere = goals.find((g) => g.current / g.target >= 0.9 && g.current / g.target < 1);
+    if (almostThere) {
+      return `You're almost there on "${almostThere.name}" — a little more and you'll hit it!`;
+    }
+    if (totalExpenses > totalIncome) {
+      return 'Your expenses are outpacing your income this period — worth a look.';
+    }
+    return "You're on track. Keep logging your transactions to stay ahead.";
+  }
+
   return (
     <div className="dashboard">
       <h2>Dashboard</h2>
@@ -35,6 +56,16 @@ function Dashboard({ transactions, goals }) {
             ${net.toFixed(2)}
           </strong>
         </div>
+      </div>
+
+      <div className="goal-progress">
+        <h3>Overall Goal Progress</h3>
+        <p>{goalProgressPercent}% across all active goals</p>
+      </div>
+
+      <div className="next-step">
+        <h3>Next Step</h3>
+        <p>{getNextStep()}</p>
       </div>
 
       <h3>Spending by Category</h3>
