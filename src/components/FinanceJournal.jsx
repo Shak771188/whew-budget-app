@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { parseBankCsv } from '../utils/parseBankCsv';
+import { sortByDateDesc } from '../utils/sortTransactions';
+import ConnectBankAccount from './ConnectBankAccount';
 
 function FinanceJournal({ transactions, setTransactions }) {
   const [date, setDate] = useState('');
@@ -28,10 +30,6 @@ function FinanceJournal({ transactions, setTransactions }) {
     setAmount('');
     setType('expense');
     setNote('');
-  }
-
-  function sortByDateDesc(list) {
-    return list.slice().sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0));
   }
 
   function handleImport(e) {
@@ -66,9 +64,11 @@ function FinanceJournal({ transactions, setTransactions }) {
     <div className="finance-journal">
       <h2>Finance Journal</h2>
 
+      <ConnectBankAccount setTransactions={setTransactions} />
+
       <div className="csv-import">
         <label htmlFor="bank-csv-input">
-          <strong>Import bank transactions (CSV)</strong>
+          <strong>Or import bank transactions (CSV)</strong>
         </label>
         <input
           id="bank-csv-input"

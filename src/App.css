@@ -182,3 +182,22 @@
     border-right-color: var(--border);
   }
 }
+.bank-connect {
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border: 1px solid #e2c4c4;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.bank-connect button {
+  padding: 0.6rem 1.25rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.bank-connect-status {
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+  color: #555;
+}
