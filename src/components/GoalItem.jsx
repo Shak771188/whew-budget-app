@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import BankTransferContribution from './BankTransferContribution';
 
 
 function GoalItem({ goal, setGoals }) {
@@ -46,16 +47,20 @@ function GoalItem({ goal, setGoals }) {
       )}
 
       {!isComplete && (
-        <form className="add-contribution" onSubmit={handleAddContribution}>
-          <input
-            type="number"
-            step="0.01"
-            placeholder="Add amount"
-            value={contribution}
-            onChange={(e) => setContribution(e.target.value)}
-          />
-          <button type="submit">Add</button>
-        </form>
+        <>
+          <BankTransferContribution goal={goal} setGoals={setGoals} />
+
+          <form className="add-contribution" onSubmit={handleAddContribution}>
+            <input
+              type="number"
+              step="0.01"
+              placeholder="Or add manually"
+              value={contribution}
+              onChange={(e) => setContribution(e.target.value)}
+            />
+            <button type="submit">Add</button>
+          </form>
+        </>
       )}
     </li>
   );

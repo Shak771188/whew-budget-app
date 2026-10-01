@@ -201,3 +201,14 @@
   font-size: 0.9rem;
   color: #555;
 }
+.bank-transfer-contribution {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.bank-transfer-status {
+  font-size: 0.85rem;
+  color: #555;
+  margin-top: 0.25rem;
+}
