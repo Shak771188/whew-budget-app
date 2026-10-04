@@ -7,7 +7,7 @@ import Transactions from './components/Transactions';
 import FinanceJournal from './components/FinanceJournal';
 import Account from './components/Account';
 import NotifToast from './components/NotifToast';
-import { URBAN_WINS, URBAN_LOSSES, getRand } from './utils/motivation';
+import { URBAN_WINS, getRand } from './utils/motivation';
 import './App.css';
 
 const DEFAULT_CATEGORY_BUDGETS = [
