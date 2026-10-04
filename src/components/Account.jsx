@@ -15,6 +15,8 @@ function Account({
   profile,
   setProfile,
   defaultCategoryBudgets,
+  linkedAccounts = [],
+  setLinkedAccounts = () => {},
 }) {
   const [name, setName] = useState(profile?.name || '');
   const [email, setEmail] = useState(profile?.email || '');
@@ -70,6 +72,7 @@ function Account({
       monthlyBudget,
       categoryBudgets,
       journalEntries,
+      linkedAccounts,
     };
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -90,6 +93,7 @@ function Account({
     setMonthlyBudget(0);
     setCategoryBudgets(defaultCategoryBudgets);
     setJournalEntries([]);
+    setLinkedAccounts([]);
     setProfile({ name: '', email: '' });
     setName('');
     setEmail('');
@@ -139,10 +143,29 @@ function Account({
 
       <section className="account-card">
         <h3>Linked Accounts</h3>
-        <p>
-          Bank connections made from the Transactions tab will appear here. Full
-          linked-account management coming soon.
-        </p>
+        {linkedAccounts.length === 0 ? (
+          <p>No bank accounts linked yet. Connect one from the Transactions tab.</p>
+        ) : (
+          <ul className="linked-accounts-list">
+            {linkedAccounts.map((a) => (
+              <li key={a.id}>
+                <span>
+                  🏦 {a.bankName}
+                  {a.mask ? ` ••${a.mask}` : ''}
+                </span>
+                <button
+                  type="button"
+                  className="account-reset-btn"
+                  onClick={() =>
+                    setLinkedAccounts((prev) => prev.filter((x) => x.id !== a.id))
+                  }
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <section className="account-card account-danger-card">

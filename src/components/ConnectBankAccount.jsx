@@ -2,10 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { usePlaidLink } from 'react-plaid-link';
 import { categorizeTransaction } from '../utils/categorize';
 import { sortByDateDesc } from '../utils/sortTransactions';
+import { mergeImported } from '../utils/mergeImported';
 
 const API_URL = import.meta.env.VITE_BANK_API_URL;
 
-function ConnectBankAccount({ setTransactions }) {
+function ConnectBankAccount({ setTransactions, setLinkedAccounts }) {
   const [linkToken, setLinkToken] = useState(null);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState('');
@@ -29,8 +30,9 @@ function ConnectBankAccount({ setTransactions }) {
 
   // Step 3: Plaid Link calls this once the user finishes logging into their
   // sandbox bank. publicToken is short-lived, so we trade it in immediately.
+  // metadata describes the bank and accounts the user picked.
   const onSuccess = useCallback(
-    async (publicToken) => {
+    async (publicToken, metadata) => {
       setStatus('Finishing connection…');
       try {
         const exchangeRes = await fetch(`${API_URL}/exchange-public-token`, {
@@ -41,6 +43,26 @@ function ConnectBankAccount({ setTransactions }) {
         const exchangeData = await exchangeRes.json();
         if (!exchangeRes.ok) {
           throw new Error(exchangeData.error || 'Could not finish linking that account.');
+        }
+
+        // Remember which bank was linked (name + last 4 digits), once per bank/account.
+        const institution = metadata?.institution?.name || 'Linked bank';
+        const mask = metadata?.accounts?.[0]?.mask || '';
+        if (setLinkedAccounts) {
+          setLinkedAccounts((prev) => {
+            const exists = prev.some((a) => a.bankName === institution && a.mask === mask);
+            return exists
+              ? prev
+              : [
+                  ...prev,
+                  {
+                    id: `acct-${Date.now()}`,
+                    bankName: institution,
+                    mask,
+                    connectedAt: new Date().toISOString(),
+                  },
+                ];
+          });
         }
 
         // Step 4: now that the account is linked, pull its transactions and
@@ -54,9 +76,10 @@ function ConnectBankAccount({ setTransactions }) {
           ...t,
           category: t.type === 'income' ? 'Income' : categorizeTransaction(t.description),
           note: t.description,
+          imported: true,
         }));
 
-        setTransactions((prev) => sortByDateDesc([...prev, ...categorized]));
+        setTransactions((prev) => mergeImported(prev, categorized));
         const matched = categorized.filter((t) => t.category !== 'Uncategorized').length;
         setStatus(
           `Connected! Imported ${categorized.length} transaction${categorized.length === 1 ? '' : 's'} — ${matched} sorted into categories automatically.`
@@ -69,7 +92,7 @@ function ConnectBankAccount({ setTransactions }) {
         setLinkToken(null);
       }
     },
-    [setTransactions]
+    [setTransactions, setLinkedAccounts]
   );
 
   const onExit = useCallback((err) => {

@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { parseBankCsv } from '../utils/parseBankCsv';
 import { sortByDateDesc } from '../utils/sortTransactions';
 import ConnectBankAccount from './ConnectBankAccount';
+import { mergeImported } from '../utils/mergeImported';
 
-function Transactions({ transactions, setTransactions, onExpenseAdded })  {
+function Transactions({ transactions, setTransactions, onExpenseAdded, setLinkedAccounts }) {
   const [date, setDate] = useState('');
   const [category, setCategory] = useState('');
   const [amount, setAmount] = useState('');
@@ -48,7 +49,7 @@ function Transactions({ transactions, setTransactions, onExpenseAdded })  {
           setImportMessage('No transactions found in that file — check the column headers match Date/Description/Amount (or Debit/Credit).');
           return;
         }
-        setTransactions((prev) => sortByDateDesc([...prev, ...imported]));
+        setTransactions((prev) => mergeImported(prev, imported));
         const categorized = imported.filter((t) => t.category !== 'Uncategorized').length;
         setImportMessage(
           `Imported ${imported.length} transaction${imported.length === 1 ? '' : 's'} — ${categorized} sorted into categories automatically${
@@ -68,7 +69,10 @@ function Transactions({ transactions, setTransactions, onExpenseAdded })  {
     <div className="transactions-page">
       <h2>Transactions</h2>
 
-      <ConnectBankAccount setTransactions={setTransactions} />
+      <ConnectBankAccount
+        setTransactions={setTransactions}
+        setLinkedAccounts={setLinkedAccounts}
+      />
 
       <div className="csv-import">
         <label htmlFor="bank-csv-input">
@@ -129,7 +133,7 @@ function Transactions({ transactions, setTransactions, onExpenseAdded })  {
             </span>
             {t.type !== 'note' && (
               <span className="entry-amount">
-                {t.type === 'income' ? '+' : '-'}${t.amount.toFixed(2)}
+                {t.type === 'income' || t.amount < 0 ? '+' : '-'}${Math.abs(t.amount).toFixed(2)}
               </span>
             )}
             {t.note && <span className="entry-note">{t.note}</span>}

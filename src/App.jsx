@@ -24,7 +24,15 @@ const DEFAULT_CATEGORY_BUDGETS = [
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [transactions, setTransactions] = useState([]);
+  const [transactions, setTransactions] = useState(() => {
+    try {
+      const saved = localStorage.getItem('whew-transactions');
+      return saved ? JSON.parse(saved) : [];
+    } catch (err) {
+      console.error('Failed to load transactions from localStorage:', err);
+      return [];
+    }
+  });
   const [notif, setNotif] = useState(null);
 
   const [goals, setGoals] = useState(() => {
@@ -78,6 +86,24 @@ function App() {
     }
   });
 
+  const [linkedAccounts, setLinkedAccounts] = useState(() => {
+    try {
+      const saved = localStorage.getItem('whew-linked-accounts');
+      return saved ? JSON.parse(saved) : [];
+    } catch (err) {
+      console.error('Failed to load linked accounts from localStorage:', err);
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('whew-transactions', JSON.stringify(transactions));
+    } catch (err) {
+      console.error('Failed to save transactions to localStorage:', err);
+    }
+  }, [transactions]);
+
   useEffect(() => {
     try {
       localStorage.setItem('whew-goals', JSON.stringify(goals));
@@ -117,6 +143,14 @@ function App() {
       console.error('Failed to save profile to localStorage:', err);
     }
   }, [profile]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('whew-linked-accounts', JSON.stringify(linkedAccounts));
+    } catch (err) {
+      console.error('Failed to save linked accounts to localStorage:', err);
+    }
+  }, [linkedAccounts]);
 
   function showMotivation() {
     setNotif({ msg: getRand(URBAN_WINS), type: 'positive' });
@@ -231,6 +265,7 @@ function App() {
           transactions={transactions}
           setTransactions={setTransactions}
           onExpenseAdded={handleExpenseAdded}
+          setLinkedAccounts={setLinkedAccounts}
         />
       )}
 
@@ -257,6 +292,8 @@ function App() {
           profile={profile}
           setProfile={setProfile}
           defaultCategoryBudgets={DEFAULT_CATEGORY_BUDGETS}
+          linkedAccounts={linkedAccounts}
+          setLinkedAccounts={setLinkedAccounts}
         />
       )}
 

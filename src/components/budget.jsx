@@ -28,6 +28,8 @@ function Budget({ transactions, setTransactions, categoryBudgets, setCategoryBud
   const [budgetInput, setBudgetInput] = useState(monthlyBudget);
   const [editingId, setEditingId] = useState(null);
   const [editAmount, setEditAmount] = useState('');
+  const [subtractId, setSubtractId] = useState(null);
+  const [subtractAmount, setSubtractAmount] = useState('');
 
   const spentByCategory = transactions
     .filter((t) => t.type === 'expense')
@@ -41,19 +43,68 @@ function Budget({ transactions, setTransactions, categoryBudgets, setCategoryBud
     return spentByCategory[label.trim().toLowerCase()] || 0;
   }
 
+  function todayString() {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  // Quick-adds are tagged with quick: true so "Undo" only ever removes those,
+  // never a bank import or a transaction typed in by hand.
+  function quickSpendsFor(category) {
+    const key = category.label.trim().toLowerCase();
+    return transactions.filter(
+      (t) => t.quick && t.type === 'expense' && t.category.trim().toLowerCase() === key
+    );
+  }
+
   function logQuickSpend(category, amount) {
     setTransactions([
       ...transactions,
       {
         id: Date.now(),
-        date: new Date().toISOString().split('T')[0],
+        date: todayString(),
         category: category.label,
         amount,
         type: 'expense',
+        quick: true,
       },
     ]);
 
     if (onExpenseAdded) onExpenseAdded(category.label, amount);
+  }
+
+  function undoLastQuickSpend(category) {
+    const quickOnes = quickSpendsFor(category);
+    if (quickOnes.length === 0) return;
+    const last = quickOnes.reduce((a, b) => (b.id > a.id ? b : a));
+    setTransactions(transactions.filter((t) => t.id !== last.id));
+  }
+
+  function startSubtracting(c) {
+    setSubtractId(c.id);
+    setSubtractAmount('');
+  }
+
+  // Subtracting adds a negative expense (a refund/correction). Every total in the
+  // app already sums expenses, so spent and remaining update with no extra code.
+  function saveSubtract(category) {
+    const entered = parseFloat(subtractAmount);
+    if (!entered || entered <= 0) return;
+    const amount = Math.min(entered, getSpent(category.label));
+    if (amount > 0) {
+      setTransactions([
+        ...transactions,
+        {
+          id: Date.now(),
+          date: todayString(),
+          category: category.label,
+          amount: -amount,
+          type: 'expense',
+          note: 'Budget adjustment',
+        },
+      ]);
+    }
+    setSubtractId(null);
+    setSubtractAmount('');
   }
 
   function handleAddCategory(e) {
@@ -154,6 +205,7 @@ function Budget({ transactions, setTransactions, categoryBudgets, setCategoryBud
                 const spent = getSpent(c.label);
                 const over = spent > c.budget;
                 const percent = c.budget > 0 ? Math.min(100, Math.round((spent / c.budget) * 100)) : 0;
+                const hasQuick = quickSpendsFor(c).length > 0;
                 return (
                   <div key={c.id} className={`budget-category-row ${over ? 'over-budget' : ''}`}>
                     <div className="budget-category-top">
@@ -189,8 +241,38 @@ function Budget({ transactions, setTransactions, categoryBudgets, setCategoryBud
                           />
                           <button onClick={() => saveEditingCategory(c.id)}>Save</button>
                         </>
+                      ) : subtractId === c.id ? (
+                        <>
+                          <input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            value={subtractAmount}
+                            onChange={(e) => setSubtractAmount(e.target.value)}
+                            placeholder="Amount to subtract"
+                            autoFocus
+                          />
+                          <button onClick={() => saveSubtract(c)}>Apply</button>
+                          <button onClick={() => setSubtractId(null)}>Cancel</button>
+                        </>
                       ) : (
                         <>
+                          <button
+                            className="quick-spend-btn"
+                            onClick={() => undoLastQuickSpend(c)}
+                            disabled={!hasQuick}
+                            title="Undo the last quick-add"
+                          >
+                            ↩ Undo
+                          </button>
+                          <button
+                            className="quick-spend-btn"
+                            onClick={() => startSubtracting(c)}
+                            disabled={spent <= 0}
+                            title="Subtract a refund or correction"
+                          >
+                            − Subtract
+                          </button>
                           <button onClick={() => startEditingCategory(c)}>Edit</button>
                           <button className="remove-category-btn" onClick={() => handleRemoveCategory(c.id)}>
                             Remove
