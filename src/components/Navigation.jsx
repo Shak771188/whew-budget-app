@@ -28,11 +28,24 @@ function Navigation({ activeTab, setActiveTab }) {
       </div>
 
       <div className="nav-tabs">
-        <button className={activeTab === 'dashboard' ? 'active' : ''} onClick={() => setActiveTab('dashboard')}>Dashboard</button>
-        <button className={activeTab === 'budget' ? 'active' : ''} onClick={() => setActiveTab('budget')}>Budget</button>
-        <button className={activeTab === 'goals' ? 'active' : ''} onClick={() => setActiveTab('goals')}>Goals</button>
-        <button className={activeTab === 'transactions' ? 'active' : ''} onClick={() => setActiveTab('transactions')}>Transactions</button>
-        <button className={activeTab === 'journal' ? 'active' : ''} onClick={() => setActiveTab('journal')}>Finance Journal</button>
+        <button className={activeTab === 'dashboard' ? 'active' : ''} onClick={() => setActiveTab('dashboard')}>
+          <span className="nav-icon">📊</span> Dashboard
+        </button>
+        <button className={activeTab === 'budget' ? 'active' : ''} onClick={() => setActiveTab('budget')}>
+          <span className="nav-icon">💰</span> Budget
+        </button>
+        <button className={activeTab === 'goals' ? 'active' : ''} onClick={() => setActiveTab('goals')}>
+          <span className="nav-icon">🎯</span> Goals
+        </button>
+        <button className={activeTab === 'transactions' ? 'active' : ''} onClick={() => setActiveTab('transactions')}>
+          <span className="nav-icon">💳</span> Transactions
+        </button>
+        <button className={activeTab === 'journal' ? 'active' : ''} onClick={() => setActiveTab('journal')}>
+          <span className="nav-icon">📔</span> Finance Journal
+        </button>
+        <button className={activeTab === 'account' ? 'active' : ''} onClick={() => setActiveTab('account')}>
+          <span className="nav-icon">👤</span> Account
+        </button>
       </div>
     </nav>
   );

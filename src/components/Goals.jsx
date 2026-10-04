@@ -3,7 +3,7 @@ import GoalItem from './GoalItem';
 
 const API_URL = import.meta.env.VITE_BANK_API_URL;
 
-function Goals({ goals, setGoals, onContribution }) {
+function Goals({ goals, setGoals, onContribution, transactions, setTransactions }) {
   const [name, setName] = useState('');
   const [target, setTarget] = useState('');
   const [timeframe, setTimeframe] = useState('');
@@ -104,6 +104,8 @@ function Goals({ goals, setGoals, onContribution }) {
             schedules={schedules}
             setSchedules={setSchedules}
             onContribution={onContribution}
+            transactions={transactions}
+            setTransactions={setTransactions}
           />
         ))}
       </ul>

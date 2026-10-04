@@ -5,6 +5,7 @@ import Budget from './components/Budget';
 import Goals from './components/Goals';
 import Transactions from './components/Transactions';
 import FinanceJournal from './components/FinanceJournal';
+import Account from './components/Account';
 import NotifToast from './components/NotifToast';
 import { URBAN_WINS, URBAN_LOSSES, getRand } from './utils/motivation';
 import './App.css';
@@ -67,6 +68,16 @@ function App() {
     }
   });
 
+  const [profile, setProfile] = useState(() => {
+    try {
+      const saved = localStorage.getItem('whew-profile');
+      return saved ? JSON.parse(saved) : { name: '', email: '' };
+    } catch (err) {
+      console.error('Failed to load profile from localStorage:', err);
+      return { name: '', email: '' };
+    }
+  });
+
   useEffect(() => {
     try {
       localStorage.setItem('whew-goals', JSON.stringify(goals));
@@ -99,6 +110,14 @@ function App() {
     }
   }, [journalEntries]);
 
+  useEffect(() => {
+    try {
+      localStorage.setItem('whew-profile', JSON.stringify(profile));
+    } catch (err) {
+      console.error('Failed to save profile to localStorage:', err);
+    }
+  }, [profile]);
+
   function showMotivation() {
     setNotif({ msg: getRand(URBAN_WINS), type: 'positive' });
   }
@@ -107,7 +126,6 @@ function App() {
     setNotif({ msg, type: 'negative' });
   }
 
-  // Motivational toast on first load
   useEffect(() => {
     showMotivation();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -152,10 +170,7 @@ function App() {
       (c) => c.label.trim().toLowerCase() === category.trim().toLowerCase()
     );
 
-    if (!budgetEntry) {
-      showMotivation();
-      return;
-    }
+    if (!budgetEntry) return;
 
     const priorSpent = transactions
       .filter(
@@ -171,8 +186,6 @@ function App() {
       showWarning(
         `You're over budget in ${budgetEntry.label} by $${(newTotal - budgetEntry.budget).toFixed(2)}.`
       );
-    } else {
-      showMotivation();
     }
   }
 
@@ -204,7 +217,13 @@ function App() {
       )}
 
       {activeTab === 'goals' && (
-        <Goals goals={goals} setGoals={setGoals} onContribution={handleContribution} />
+        <Goals
+          goals={goals}
+          setGoals={setGoals}
+          onContribution={handleContribution}
+          transactions={transactions}
+          setTransactions={setTransactions}
+        />
       )}
 
       {activeTab === 'transactions' && (
@@ -220,6 +239,24 @@ function App() {
           transactions={transactions}
           journalEntries={journalEntries}
           setJournalEntries={setJournalEntries}
+        />
+      )}
+
+      {activeTab === 'account' && (
+        <Account
+          transactions={transactions}
+          setTransactions={setTransactions}
+          goals={goals}
+          setGoals={setGoals}
+          monthlyBudget={monthlyBudget}
+          setMonthlyBudget={setMonthlyBudget}
+          categoryBudgets={categoryBudgets}
+          setCategoryBudgets={setCategoryBudgets}
+          journalEntries={journalEntries}
+          setJournalEntries={setJournalEntries}
+          profile={profile}
+          setProfile={setProfile}
+          defaultCategoryBudgets={DEFAULT_CATEGORY_BUDGETS}
         />
       )}
 

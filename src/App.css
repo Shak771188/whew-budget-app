@@ -367,6 +367,17 @@ h2, h3 {
   font-family: 'Sora', 'Inter', sans-serif;
 }
 
+h2 {
+  font-size: 30px;
+  font-weight: 800;
+  color: #1C0F00;
+  display: inline-block;
+  margin-bottom: 24px;
+  padding-bottom: 10px;
+  border-bottom: 3px solid #E8B84B;
+  letter-spacing: -0.3px;
+}
+
 .dashboard {
   max-width: 1100px;
   margin: 0 auto;
@@ -712,11 +723,11 @@ h2, h3 {
 .budget-summary > div {
   flex: 1;
   text-align: center;
-  background: #FFFFFF;
-  border: 1.5px solid #E8C99A;
+  background: linear-gradient(135deg, #FFF5E0 0%, #FFE8B8 60%, #FDF4E0 100%);
+  border: 1.5px solid #E8B84B;
   border-radius: 16px;
   padding: 20px;
-  box-shadow: 0 4px 16px rgba(184, 134, 11, 0.10);
+  box-shadow: 0 4px 16px rgba(184, 134, 11, 0.14);
 }
 
 .budget-summary span {
@@ -731,7 +742,12 @@ h2, h3 {
 .budget-summary strong {
   font-family: 'Sora', 'Inter', sans-serif;
   font-size: 24px;
+  font-weight: 800;
   color: #1C0F00;
+}
+
+.budget-summary span {
+  color: #B8860B;
 }
 
 .budget-summary strong.positive {
@@ -1490,4 +1506,176 @@ h2, h3 {
   background: linear-gradient(90deg, #D6336C, #FF6B8A);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+.withdraw-section {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed #E8C99A;
+}
+
+.withdraw-available {
+  font-size: 13px;
+  font-weight: 700;
+  color: #5C7A5A;
+  margin-bottom: 10px;
+}
+
+.withdraw-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.withdraw-form input[type='number'],
+.withdraw-form input[type='text'] {
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid #E8C99A;
+  font-size: 13px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.withdraw-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #8A6A40;
+  white-space: nowrap;
+}
+
+.withdraw-form button {
+  padding: 9px 16px;
+  border-radius: 10px;
+  border: 1px solid #D6336C;
+  background: transparent;
+  color: #D6336C;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.withdraw-message {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: #8A6A40;
+}
+.nav-icon {
+  margin-right: 6px;
+}
+/* ===== Account page ===== */
+
+.account-page {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+}
+
+.account-card {
+  background: #FFFFFF;
+  border: 1.5px solid #E8C99A;
+  border-radius: 18px;
+  padding: 20px 22px;
+  margin-bottom: 20px;
+}
+
+.account-card h3 {
+  margin: 0 0 14px;
+  font-size: 16px;
+}
+
+.profile-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.profile-form input {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #E8C99A;
+  font-size: 13px;
+  flex: 1;
+  min-width: 160px;
+}
+
+.profile-form button {
+  padding: 10px 18px;
+  border-radius: 10px;
+  border: none;
+  background: linear-gradient(135deg, #E8B84B, #B8860B);
+  color: #FFF9F3;
+  font-weight: 700;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.account-saved-msg {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: #5C7A5A;
+}
+
+.account-setting-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid #F0E0C0;
+}
+
+.account-setting-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.account-setting-row strong {
+  display: block;
+  font-size: 14px;
+  color: #1C0F00;
+  margin-bottom: 4px;
+}
+
+.account-setting-row p {
+  margin: 0;
+  font-size: 12px;
+  color: #8A6A40;
+  max-width: 400px;
+}
+
+.account-setting-row button {
+  flex-shrink: 0;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid #E8B84B;
+  background: transparent;
+  color: #B8860B;
+  font-weight: 700;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.account-placeholder-text {
+  color: #8A6A40;
+  font-size: 13px;
+  margin: 0;
+}
+
+.account-danger-card {
+  border-color: #D6336C;
+}
+
+.account-reset-btn {
+  border-color: #D6336C !important;
+  color: #D6336C !important;
+}
+.account-error-msg {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: #D6336C;
 }

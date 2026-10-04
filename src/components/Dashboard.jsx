@@ -97,10 +97,10 @@ function Dashboard({ transactions, goals, setTransactions, monthlyBudget, catego
     }))
     .filter((c) => c.spent > c.budget);
 
-  const goalProgress =
+    const goalProgress =
     goals.length === 0
       ? 0
-      : goals.reduce((sum, g) => sum + g.current / g.target, 0) / goals.length;
+      : goals.reduce((sum, g) => sum + Math.min(g.current / g.target, 1), 0) / goals.length;
 
   const goalProgressPercent = Math.round(goalProgress * 100);
 
