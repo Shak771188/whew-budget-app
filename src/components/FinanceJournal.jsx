@@ -1,137 +1,133 @@
 import { useState } from 'react';
-import { parseBankCsv } from '../utils/parseBankCsv';
-import { sortByDateDesc } from '../utils/sortTransactions';
-import ConnectBankAccount from './ConnectBankAccount';
 
-function FinanceJournal({ transactions, setTransactions }) {
-  const [date, setDate] = useState('');
-  const [category, setCategory] = useState('');
-  const [amount, setAmount] = useState('');
-  const [type, setType] = useState('expense');
-  const [note, setNote] = useState('');
-  const [importMessage, setImportMessage] = useState('');
+function FinanceJournal({ transactions, journalEntries, setJournalEntries }) {
+  const todayStr = new Date().toISOString().split('T')[0];
+  const [entryDate, setEntryDate] = useState(todayStr);
+  const [entryText, setEntryText] = useState('');
+  const [selectedIds, setSelectedIds] = useState([]);
+  const [showPicker, setShowPicker] = useState(false);
+
+  const recentTransactions = [...transactions]
+    .filter((t) => t.type !== 'note')
+    .sort((a, b) => new Date(b.date) - new Date(a.date))
+    .slice(0, 15);
+
+  function toggleTransaction(id) {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  }
 
   function handleSubmit(e) {
     e.preventDefault();
+    if (!entryText.trim()) return;
 
     const newEntry = {
       id: Date.now(),
-      date,
-      category,
-      amount: parseFloat(amount),
-      type,
-      note,
+      date: entryDate,
+      text: entryText,
+      transactionIds: selectedIds,
     };
 
-    setTransactions(sortByDateDesc([...transactions, newEntry]));
-
-    setDate('');
-    setCategory('');
-    setAmount('');
-    setType('expense');
-    setNote('');
+    setJournalEntries([newEntry, ...journalEntries]);
+    setEntryDate(todayStr);
+    setEntryText('');
+    setSelectedIds([]);
+    setShowPicker(false);
   }
 
-  function handleImport(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+  function handleDeleteEntry(id) {
+    setJournalEntries(journalEntries.filter((e) => e.id !== id));
+  }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      try {
-        const imported = parseBankCsv(event.target.result);
-        if (imported.length === 0) {
-          setImportMessage('No transactions found in that file — check the column headers match Date/Description/Amount (or Debit/Credit).');
-          return;
-        }
-        setTransactions((prev) => sortByDateDesc([...prev, ...imported]));
-        const categorized = imported.filter((t) => t.category !== 'Uncategorized').length;
-        setImportMessage(
-          `Imported ${imported.length} transaction${imported.length === 1 ? '' : 's'} — ${categorized} sorted into categories automatically${
-            categorized < imported.length ? `, ${imported.length - categorized} left as Uncategorized` : ''
-          }.`
-        );
-      } catch (err) {
-        console.error('Failed to import CSV:', err);
-        setImportMessage('Something went wrong reading that file. Make sure it\'s a CSV exported from your bank.');
-      }
-    };
-    reader.readAsText(file);
-    e.target.value = '';
+  function getTransaction(id) {
+    return transactions.find((t) => t.id === id);
   }
 
   return (
     <div className="finance-journal">
       <h2>Finance Journal</h2>
+      <p className="journal-subtitle">
+        A space to reflect on your money habits — what's working, what's tempting, what you noticed about yourself this week.
+      </p>
 
-      <ConnectBankAccount setTransactions={setTransactions} />
-
-      <div className="csv-import">
-        <label htmlFor="bank-csv-input">
-          <strong>Or import bank transactions (CSV)</strong>
-        </label>
-        <input
-          id="bank-csv-input"
-          type="file"
-          accept=".csv"
-          onChange={handleImport}
-        />
-        {importMessage && <p className="import-message">{importMessage}</p>}
-      </div>
-
-      <form onSubmit={handleSubmit}>
+      <form className="journal-entry-form" onSubmit={handleSubmit}>
         <input
           type="date"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
+          value={entryDate}
+          onChange={(e) => setEntryDate(e.target.value)}
           required
         />
-        <input
-          type="text"
-          placeholder="Category (e.g. Groceries, Income)"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
+        <textarea
+          placeholder="What's on your mind about your money today?"
+          value={entryText}
+          onChange={(e) => setEntryText(e.target.value)}
+          rows={5}
           required
         />
-        <input
-          type="number"
-          step="0.01"
-          placeholder="Amount"
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          required
-        />
-        <select value={type} onChange={(e) => setType(e.target.value)}>
-          <option value="expense">Expense</option>
-          <option value="income">Income</option>
-        </select>
-        <input
-          type="text"
-          placeholder="Note (optional)"
-          value={note}
-          onChange={(e) => setNote(e.target.value)}
-        />
-        <button type="submit">Add Entry</button>
+
+        <button
+          type="button"
+          className="toggle-picker-btn"
+          onClick={() => setShowPicker(!showPicker)}
+        >
+          {showPicker ? 'Hide transactions' : '+ Attach a transaction (optional)'}
+        </button>
+
+        {showPicker && (
+          <div className="transaction-picker">
+            {recentTransactions.length === 0 ? (
+              <p className="no-transactions">No transactions logged yet.</p>
+            ) : (
+              recentTransactions.map((t) => (
+                <label key={t.id} className="transaction-picker-row">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.includes(t.id)}
+                    onChange={() => toggleTransaction(t.id)}
+                  />
+                  <span>{t.date}</span>
+                  <span>{t.category}</span>
+                  <span>{t.type === 'income' ? '+' : '-'}${t.amount.toFixed(2)}</span>
+                </label>
+              ))
+            )}
+          </div>
+        )}
+
+        <button type="submit">Save Entry</button>
       </form>
-      <ul className="transaction-list">
-          {sortByDateDesc(transactions).map((t) => (
-              <li key={t.id} className={t.type}>
-                <span className="entry-date">{t.date}</span>
-                <span className="entry-category">
-                  {t.category}
-                  {t.imported && t.category === 'Uncategorized' && (
-                    <span className="uncategorized-flag"> ⚠️</span>
-                  )}
-                </span>
-                {t.type !== 'note' && (
-                  <span className="entry-amount">
-                    {t.type === 'income' ? '+' : '-'}${t.amount.toFixed(2)}
-                  </span>
-                )}
-                {t.note && <span className="entry-note">{t.note}</span>}
-              </li>
-            ))}
-        </ul>
+
+      <div className="journal-entries">
+        {journalEntries.length === 0 ? (
+          <p>No journal entries yet — write your first reflection above.</p>
+        ) : (
+          journalEntries.map((entry) => (
+            <div key={entry.id} className="journal-entry-card">
+              <div className="journal-entry-header">
+                <span className="journal-entry-date">{entry.date}</span>
+                <button className="delete-entry-btn" onClick={() => handleDeleteEntry(entry.id)}>
+                  Delete
+                </button>
+              </div>
+              <p className="journal-entry-text">{entry.text}</p>
+              {entry.transactionIds && entry.transactionIds.length > 0 && (
+                <div className="journal-entry-transactions">
+                  {entry.transactionIds.map((id) => {
+                    const t = getTransaction(id);
+                    if (!t) return null;
+                    return (
+                      <span key={id} className="journal-transaction-chip">
+                        {t.category} · {t.type === 'income' ? '+' : '-'}${t.amount.toFixed(2)}
+                      </span>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
     </div>
   );
 }
